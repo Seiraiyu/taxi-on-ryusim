@@ -1,0 +1,53 @@
+name: Taxi Regression Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install RyuSim
+        run: |
+          curl -fsSL https://ryusim.seiraiyu.com/install.sh | bash
+          echo "$HOME/.ryusim/bin" >> $GITHUB_PATH
+
+      - name: Verify RyuSim
+        run: ryusim --version
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests (group ${{ matrix.group }})
+        run: |
+          mkdir -p results
+          pytest src/ \
+            --junitxml=results/junit-${{ matrix.group }}.xml \
+            -v \
+            --splits 5 \
+            --group ${{ matrix.group }} \
+            --splitting-algorithm least_duration \
+            || true
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.group }}
+          path: results/
