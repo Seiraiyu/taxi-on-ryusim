@@ -1,0 +1,26 @@
+# Simulation artifacts
+sim_build/
+obj_dir/
+__pycache__/
+*.pyc
+
+# Waveforms
+*.vcd
+*.fst
+
+# Test results
+results/
+*.xml
+
+# cocotb
+results.xml
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS
+.DS_Store
