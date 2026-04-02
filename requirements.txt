@@ -1,5 +1,5 @@
 cocotb @ git+https://github.com/Seiraiyu/cocotb.git
-cocotb-bus==0.2.1
+cocotb-bus==0.3.0
 cocotb-test==0.2.6
 cocotbext-axi==0.1.28
 cocotbext-eth==0.1.22

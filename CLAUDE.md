@@ -64,6 +64,6 @@ python scripts/port_tests.py
 
 ## Dependencies
 
-- RyuSim >= 1.5.4 (install via `curl -fsSL https://ryusim.seiraiyu.com/install.sh | bash`)
+- RyuSim >= 1.6.0 (install via `curl -fsSL https://ryusim.seiraiyu.com/install.sh | bash`)
 - Python 3.10+ with packages from `requirements.txt`
 - cocotb from Seiraiyu fork (`pip install git+https://github.com/Seiraiyu/cocotb.git`)
