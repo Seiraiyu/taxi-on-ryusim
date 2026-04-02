@@ -12,7 +12,7 @@ The [taxi](https://github.com/fpganinja/taxi) library is a comprehensive FPGA IP
 
 ```bash
 # Clone with submodule
-git clone --recurse-submodules https://github.com/<owner>/taxi-on-ryusim.git
+git clone --recurse-submodules https://github.com/Seiraiyu/taxi-on-ryusim.git
 cd taxi-on-ryusim
 
 # One-step setup (installs RyuSim + Python deps)
@@ -33,7 +33,7 @@ cd src/axis/tb/taxi_axis_fifo && make WAVES=1
 
 ## Requirements
 
-- **RyuSim** >= 1.5.4
+- **RyuSim** >= 1.6.0
 - **Python** >= 3.10
 - **cocotb** (Seiraiyu fork)
 
