@@ -1,6 +1,6 @@
 cocotb @ git+https://github.com/Seiraiyu/cocotb.git@feat/ryusim-simulator-support
 cocotb-bus==0.3.0
-cocotb-test==0.2.6
+cocotb-test @ git+https://github.com/Seiraiyu/cocotb-test.git
 cocotbext-axi==0.1.28
 cocotbext-eth==0.1.22
 cocotbext-i2c==0.1.2
