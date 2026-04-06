@@ -1,4 +1,4 @@
-cocotb @ git+https://github.com/Seiraiyu/cocotb.git
+cocotb @ git+https://github.com/Seiraiyu/cocotb.git@feat/ryusim-simulator-support
 cocotb-bus==0.3.0
 cocotb-test==0.2.6
 cocotbext-axi==0.1.28
