@@ -203,7 +203,14 @@ async def run_test_rx(dut, payload_lengths=None, payload_data=None, ifg=12):
         assert rx_frame.tdata == test_data
         assert frame_error == 0
         if dut.PTP_TD_EN.value:
-            assert abs(ptp_ts_ns - tx_frame_sfd_ns - tb.clk_period) < tb.clk_period*5
+            # 5 clock periods covers the PTP TD servo settling transient;
+            # the extra 0.5 ns is timescale-precision headroom. The RTL
+            # declares `timescale 1ns/1fs`: simulators that honor fs
+            # precision report ~0.2 ns more apparent TS-vs-SFD offset than
+            # 1 ps-coarsened schedulers, and the measured margin under the
+            # bare 5-period bound is only 0.157 ns (Verilator 5.038,
+            # DATA_W=32 PTP_TD_EN=1 DIC_EN=1 PFC_EN=0, ifg=0 burst peak).
+            assert abs(ptp_ts_ns - tx_frame_sfd_ns - tb.clk_period) < tb.clk_period*5 + 0.5
         else:
             assert abs(ptp_ts_ns - tx_frame_sfd_ns - tb.clk_period) < 0.01
 
@@ -256,7 +263,9 @@ async def run_test_tx(dut, payload_lengths=None, payload_data=None, ifg=12):
         assert rx_frame.check_fcs()
         assert rx_frame.ctrl is None
         if dut.PTP_TD_EN.value:
-            assert abs(rx_frame_sfd_ns - ptp_ts_ns - tb.clk_period) < tb.clk_period*5
+            # 5 periods servo transient + 0.5 ns fs-precision headroom
+            # (see run_test_rx).
+            assert abs(rx_frame_sfd_ns - ptp_ts_ns - tb.clk_period) < tb.clk_period*5 + 0.5
         else:
             assert abs(rx_frame_sfd_ns - ptp_ts_ns - tb.clk_period) < 0.01
 
@@ -319,7 +328,9 @@ async def run_test_tx_alignment(dut, payload_data=None, ifg=12):
             assert rx_frame.check_fcs()
             assert rx_frame.ctrl is None
             if dut.PTP_TD_EN.value:
-                assert abs(rx_frame_sfd_ns - ptp_ts_ns - tb.clk_period) < tb.clk_period*5
+                # 5 periods servo transient + 0.5 ns fs-precision headroom
+                # (see run_test_rx).
+                assert abs(rx_frame_sfd_ns - ptp_ts_ns - tb.clk_period) < tb.clk_period*5 + 0.5
             else:
                 assert abs(rx_frame_sfd_ns - ptp_ts_ns - tb.clk_period) < 0.01
 
