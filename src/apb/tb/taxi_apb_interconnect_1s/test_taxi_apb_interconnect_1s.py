@@ -196,8 +196,10 @@ if getattr(cocotb, "top", None) is not None:
 # cocotb-test
 
 tests_dir = os.path.abspath(os.path.dirname(__file__))
-rtl_dir = os.path.abspath(os.path.join(tests_dir, "..", "..", "rtl"))
-lib_dir = os.path.abspath(os.path.join(tests_dir, "..", "..", "lib"))
+_repo_root = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], text=True).strip()
+_taxi_root = os.path.join(_repo_root, 'taxi')
+rtl_dir = os.path.join(_taxi_root, 'src', 'apb', 'rtl')
+lib_dir = os.path.join(_taxi_root, 'src', 'apb', 'lib')
 taxi_src_dir = os.path.abspath(os.path.join(lib_dir, "taxi", "src"))
 
 
