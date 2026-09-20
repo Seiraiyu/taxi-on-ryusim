@@ -1,10 +1,15 @@
 name: Taxi Regression Tests
 
+# Dispatch only: the full 162-test suite is expensive and deterministic, so
+# run it explicitly on the commit you mean rather than on every push.
 on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      two_state:
+        description: "Run the suite under `ryusim --2state` (X/Z are not represented; implies zero init)"
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   test:
@@ -31,6 +36,27 @@ jobs:
       - name: Verify RyuSim
         run: ryusim --version
 
+      # cocotb-test has no env lane for compile args and the taxi Makefiles
+      # build their -G parameter block into COMPILE_ARGS (overriding it from
+      # the command line silently drops every parameter), so inject --2state
+      # at the call boundary instead: a PATH shim on `ryusim compile`.
+      - name: Enable --2state via compile shim
+        if: inputs.two_state
+        run: |
+          RYUSIM_REAL="$(command -v ryusim)"
+          mkdir -p "$HOME/.ryusim-shim"
+          cat > "$HOME/.ryusim-shim/ryusim" <<SHIM
+          #!/bin/bash
+          if [ "\$1" = "compile" ]; then
+              shift
+              exec "$RYUSIM_REAL" compile --2state "\$@"
+          fi
+          exec "$RYUSIM_REAL" "\$@"
+          SHIM
+          chmod +x "$HOME/.ryusim-shim/ryusim"
+          echo "$HOME/.ryusim-shim" >> $GITHUB_PATH
+          echo "two-state shim: $HOME/.ryusim-shim/ryusim -> $RYUSIM_REAL"
+
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
@@ -43,6 +69,20 @@ jobs:
             --splits 5 \
             --group ${{ matrix.group }} \
             --splitting-algorithm least_duration
+
+      # A --2state run whose route manifests say two_state=false is not
+      # --2state evidence: the shim silently no-ops if it loses the PATH race.
+      - name: Verify --2state actually applied
+        if: inputs.two_state && always()
+        run: |
+          TOTAL=$(find src -name ryusim-route.json -path '*sim_build*' | wc -l)
+          TWO=$(find src -name ryusim-route.json -path '*sim_build*' \
+                  -exec grep -l '"two_state": true' {} + 2>/dev/null | wc -l)
+          echo "cells compiled with two_state=true: $TWO / $TOTAL"
+          [ "$TOTAL" -gt 0 ] && [ "$TWO" -eq "$TOTAL" ] || {
+              echo "ERROR: --2state requested but $((TOTAL - TWO)) of $TOTAL manifests disagree." >&2
+              exit 1
+          }
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
