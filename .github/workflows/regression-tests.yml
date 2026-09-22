@@ -1,4 +1,5 @@
 name: Taxi Regression Tests
+run-name: Taxi Regression Tests (${{ (inputs.two_state == true || inputs.two_state == 'true') && '--2state' || 'four-state' }})
 
 # Dispatch only: the full 162-test suite is expensive and deterministic, so
 # run it explicitly on the commit you mean rather than on every push.
@@ -41,7 +42,7 @@ jobs:
       # the command line silently drops every parameter), so inject --2state
       # at the call boundary instead: a PATH shim on `ryusim compile`.
       - name: Enable --2state via compile shim
-        if: inputs.two_state
+        if: inputs.two_state == true || inputs.two_state == 'true'
         run: |
           RYUSIM_REAL="$(command -v ryusim)"
           mkdir -p "$HOME/.ryusim-shim"
@@ -64,6 +65,7 @@ jobs:
         run: |
           mkdir -p results
           pytest src/ \
+            -n auto \
             --junitxml=results/junit-${{ matrix.group }}.xml \
             -v \
             --splits ${{ strategy.job-total }} \
@@ -73,7 +75,7 @@ jobs:
       # A --2state run whose route manifests say two_state=false is not
       # --2state evidence: the shim silently no-ops if it loses the PATH race.
       - name: Verify --2state actually applied
-        if: inputs.two_state && always()
+        if: (inputs.two_state == true || inputs.two_state == 'true') && always()
         run: |
           TOTAL=$(find src -name ryusim-route.json -path '*sim_build*' | wc -l)
           TWO=$(find src -name ryusim-route.json -path '*sim_build*' \
