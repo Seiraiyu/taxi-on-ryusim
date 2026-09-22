@@ -2,7 +2,10 @@ cocotb @ git+https://github.com/Seiraiyu/cocotb.git@feat/ryusim-simulator-suppor
 cocotb-bus==0.3.0
 cocotb-test @ git+https://github.com/Seiraiyu/cocotb-test.git
 cocotbext-axi==0.1.28
-cocotbext-eth==0.1.28
+# Pinned to the commit matching the taxi submodule vintage (7f0571e7, 2026-08-04)
+# rather than a PyPI release: cocotbext-eth changed its PTP timestamp semantics
+# in 0.1.24-0.1.28, and upstream taxi moved its RTL/testbenches in lockstep. See #8.
+cocotbext-eth @ git+https://github.com/alexforencich/cocotbext-eth.git@c6872e69518e46697f834bc456b4435259e4d507
 cocotbext-i2c==0.1.2
 cocotbext-pcie==0.2.16
 cocotbext-uart==0.1.4
